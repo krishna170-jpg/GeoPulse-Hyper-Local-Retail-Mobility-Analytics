@@ -1,6 +1,10 @@
-streamlit>=1.40
+streamlit>=1.46
 streamlit-folium
 folium
 plotly
 pandas
 numpy
+scikit-learn
+requests
+fpdf2>=2.7
+matplotlib
