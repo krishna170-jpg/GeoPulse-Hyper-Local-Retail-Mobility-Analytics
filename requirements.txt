@@ -1,0 +1,16 @@
+streamlit
+pandas
+numpy
+plotly
+folium
+streamlit-folium
+geopandas
+shapely
+pyproj
+scikit-learn
+fastapi
+uvicorn
+pydantic
+requests
+python-dotenv
+openpyxl
