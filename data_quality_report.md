@@ -1,6 +1,6 @@
 # GPS data quality report
 
-File: `gps_pings.csv`  |  Records: 1,048,290  |  Devices: 5,000  |  Result: **1 check(s) need attention**
+File: `gps_pings.csv`  |  Records: 1,081,302  |  Devices: 5,000  |  Result: **all checks passed**
 
 | Check | Status | Issues | Detail |
 |---|---|---|---|
@@ -14,8 +14,8 @@ File: `gps_pings.csv`  |  Records: 1,048,290  |  Devices: 5,000  |  Result: **1 
 | Timestamps in chronological order per device | PASS | 0 |  |
 | Duplicate rows | PASS | 0 |  |
 | Duplicate device + timestamp | PASS | 0 |  |
-| Impossible speed between pings | FAIL | 1167 | over 120 km/h |
-| Devices with fewer than 10 pings | PASS | 0 | pings per device min 206, median 210, max 210 |
+| Impossible speed between pings | PASS | 0 | over 120 km/h |
+| Devices with fewer than 10 pings | PASS | 0 | pings per device min 208, median 216, max 220 |
 
 Time range: 2026-11-02 00:00:00 to 2026-11-02 23:59:59.
 Movement preview: `gps_movement_preview.png`. Full results: `gps_validation_report.csv`.

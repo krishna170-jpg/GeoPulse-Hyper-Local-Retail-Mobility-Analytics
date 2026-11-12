@@ -26,7 +26,7 @@ def place(rng, names, n, spread):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--devices", type=int, default=5000)
-    ap.add_argument("--pings", type=int, default=210, help="pings per device")
+    ap.add_argument("--pings", type=int, default=220, help="pings per device (before removing slot collisions)")
     ap.add_argument("--date", default="2026-11-02")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", default="gps_pings.csv")
@@ -45,14 +45,17 @@ def main():
 
     ids, lats, lons, secs = [], [], [], []
     for i in range(D):
-        h = np.sort(rng.choice(24, a.pings, p=prob) + rng.random(a.pings))      # decimal hours
+        # Pings fall on a 10-second grid (unique slots), so two pings are never closer than 10 s.
+        slots = np.unique(((rng.choice(24, a.pings, p=prob) + rng.random(a.pings)) * 360).astype(int))
+        sec = slots * 10 + rng.integers(0, 10)
+        h, n = sec / 3600, len(sec)
         t = [0, leave[i], leave[i] + commute[i], 12.5, 12.9, 13.4, 13.8, back[i], back[i] + .4, back[i] + 1, back[i] + 1.6, 24]
         pts = np.array([home[i], home[i], work[i], work[i], lunch[i], lunch[i], work[i], work[i],
                         evening[i], evening[i], home[i], home[i]])
-        lats.append(np.interp(h, t, pts[:, 0]) + rng.normal(0, 0.00015, a.pings))  # about 17 m GPS noise
-        lons.append(np.interp(h, t, pts[:, 1]) + rng.normal(0, 0.00015, a.pings))
-        secs.append(np.floor(h * 3600).astype(int))
-        ids.append(np.full(a.pings, f"DEV{i + 1:05d}"))
+        lats.append(np.interp(h, t, pts[:, 0]) + rng.normal(0, 0.00015, n))  # about 17 m GPS noise
+        lons.append(np.interp(h, t, pts[:, 1]) + rng.normal(0, 0.00015, n))
+        secs.append(sec)
+        ids.append(np.full(n, f"DEV{i + 1:05d}"))
 
     df = pd.DataFrame({"DeviceID": np.concatenate(ids), "Latitude": np.concatenate(lats).clip(BBOX[0], BBOX[1]),
                        "Longitude": np.concatenate(lons).clip(BBOX[2], BBOX[3]),
@@ -63,7 +66,7 @@ def main():
 
     with open("generation_summary.txt", "w") as f:
         f.write(f"""GeoPulse synthetic GPS generation summary
-Generated at (UTC)   : {pd.Timestamp.utcnow():%Y-%m-%d %H:%M:%S}
+Generated at (UTC)   : {pd.Timestamp.now('UTC'):%Y-%m-%d %H:%M:%S}
 City                 : Guwahati, Assam (simulated)
 Seed                 : {a.seed}
 Simulated date       : {a.date} (24 hours)

@@ -9,5 +9,5 @@ Covers all 24 hours,PASS,0,hours with no pings
 Timestamps in chronological order per device,PASS,0,
 Duplicate rows,PASS,0,
 Duplicate device + timestamp,PASS,0,
-Impossible speed between pings,FAIL,1167,over 120 km/h
-Devices with fewer than 10 pings,PASS,0,"pings per device min 206, median 210, max 210"
+Impossible speed between pings,PASS,0,over 120 km/h
+Devices with fewer than 10 pings,PASS,0,"pings per device min 208, median 216, max 220"

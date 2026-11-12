@@ -1,17 +1,17 @@
 GeoPulse synthetic GPS generation summary
-Generated at (UTC)   : 2026-11-11 16:16:06
+Generated at (UTC)   : 2026-11-12 06:02:40
 City                 : Guwahati, Assam (simulated)
 Seed                 : 42
 Simulated date       : 2026-11-02 (24 hours)
 Devices              : 5,000
-Pings generated      : 1,050,000
-Duplicate pings removed (same device and second): 1,710
-Final records        : 1,048,290
+Pings generated      : 1,081,302
+Duplicate pings removed (same device and second): 0
+Final records        : 1,081,302
 Missing values       : 0
-Latitude range       : 26.102180 to 26.202363
-Longitude range      : 91.637194 to 91.823673
+Latitude range       : 26.102191 to 26.202331
+Longitude range      : 91.637415 to 91.823587
 First / last ping    : 2026-11-02 00:00:00 / 2026-11-02 23:59:59
-Runtime (seconds)    : 3.7
+Runtime (seconds)    : 3.5
 Output file          : gps_pings.csv
 Behaviour model      : home -> morning commute -> work -> lunch (60% visit a store) -> evening (50% visit a store) -> home
 Privacy              : DeviceIDs are anonymous labels; all movement is simulated, no real people.
