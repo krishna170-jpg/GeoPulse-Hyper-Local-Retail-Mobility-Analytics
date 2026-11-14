@@ -1,64 +1,35 @@
-# 🌍 GeoPulse: Hyper-Local Retail Mobility Analytics
+# GeoPulse – Retail Location Intelligence
 
-### Turning Geographic and Retail Data into Business Intelligence
+Streamlit dashboard for hyper-local retail and mobility analytics in Guwahati.
 
-GeoPulse is an advanced analytics project designed to explore hyper-local retail patterns, geographic customer mobility, and location-based business opportunities.
+## Pages
+- **Explore:** Overview, Mobility heatmap, Customer mobility, GPS movement, Peak hours, Competitors
+- **Analyze:** Catchment, Retail intelligence, Area clusters, Whitespace finder, Forecast
+- **Decide:** Where to open, Compare areas, What-if simulator
+- **Share:** Key insights, Shortlist, Reports
+- **Data:** Your data, Methodology, Data quality, Help & FAQ
 
-## 🎯 Project Objectives
-
-- Analyze retail activity across geographic areas.
-- Understand customer mobility patterns.
-- Identify potential retail hotspots.
-- Visualize geographic retail trends.
-- Support data-driven retail location decisions.
-
-## 🛠️ Technology Stack
-
-- Python
-- Streamlit
-- Pandas
-- NumPy
-- Plotly
-- Geospatial Analytics
-- Machine Learning
-
-## 📊 Key Modules
-
-1. Retail Data Collection
-2. Geographic Data Analysis
-3. Retail Mobility Analytics
-4. Interactive Geospatial Visualization
-5. Retail Location Intelligence
-
-## 📍 Project Location
-
-Guwahati, Assam, India.
-
-## 📁 Project Structure
-
-```text
-GeoPulse/
-├── app.py
-├── fetch_retail.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-└── cache/
+## Run locally
 ```
-
-## 🚀 Run Locally
-
-```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## 👨‍💻 Project Status
+## Deploy
+Push to GitHub, then create the app at https://share.streamlit.io with `app.py` as the main file.
+After a push the app redeploys by itself (use Manage app, then Reboot app, if the look does not change).
 
-Development in progress.
+## GPS data pipeline (`gps_pipeline/`)
+1. `python generate_gps_data.py` creates `gps_pings.csv` (about 1 million simulated pings) and `generation_summary.txt`.
+2. `python validate_gps_data.py` checks it and writes the validation report, preview image and data quality report.
+3. The `.sql` files set up Snowflake (`GEOPULSE_DB`) and load the data.
 
-## 📌 Author
+`gps_pings.csv` is about 55 MB and is not stored in Git. Regenerate it with step 1 (the seed is fixed).
+`sample_gps_pings.csv` (200 devices) is in the repo root so the GPS movement page works online.
 
-Krishna Doley
+## Optional login
+Set `APP_PASSWORD` in Streamlit secrets (see `.streamlit/secrets.toml.example`).
 
-GitHub: https://github.com/krishna170-jpg
+## Data
+Visits, rent and trends are simulated for illustration. Upload your own CSV files on the **Your data** page.
+Store locations can be loaded from OpenStreetMap.
