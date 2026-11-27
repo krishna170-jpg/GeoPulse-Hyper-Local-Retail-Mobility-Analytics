@@ -1,78 +1,116 @@
-# GeoPulse: Hyper-Local Retail Mobility Analytics
+# GeoPulse Week 3 — Member 1: GPS Movement Analysis and Data Quality
 
-GeoPulse is a Streamlit dashboard that shows where visitors go, what competition looks like and where a new store could do well. It is built for Guwahati, Assam, and works with built-in demo data or your own CSV files.
+This folder implements the Member 1 tasks in the Week 3 plan:
+- GPS movement-field validation
+- Device- and session-level statistics
+- Distance and speed analysis
+- Walking / Driving / Cycling / Stationary classification
+- GPS data-quality anomaly reporting
+- CSV outputs for team integration
 
-## Pages
+## 1. Expected project layout
 
-| Page | What it does |
-|---|---|
-| **Overview** | Key numbers, a visit heat map, top areas, store categories and the weekly trend |
-| **Explore** | Heat map, peak hours (weekday vs weekend) and competitor map |
-| **Where to open** | Ranks areas for a business type and rent budget, plus a profit check |
-| **Compare & forecast** | Side-by-side areas, and a weekly visit forecast with its error |
-| **Data** | Upload CSVs, download templates, read how the numbers are made |
-| **Project plan** | The Week 3 plan: team, schedule, folders, files and rules |
-| **Help** | Quick start, FAQ and contact |
+Place this folder inside your existing `GeoPulse/` project. Keep Week 1 and Week 2 files unchanged.
 
-Every map has a **Map / Satellite** switch (top right).
+```text
+GeoPulse/
+├── data/
+│   ├── gps_pings.csv       # original 100,000-row source file
+│   └── stores.csv          # used by Member 2; not modified by this package
+├── member1_movement_analysis/
+│   ├── common.py
+│   ├── 01_movement_data_validation.py
+│   ├── 02_device_movement_analysis.py
+│   ├── 03_speed_distance_analysis.py
+│   ├── 04_movement_mode_analysis.py
+│   ├── 05_movement_quality_report.py
+│   ├── requirements.txt
+│   └── README.md
+└── outputs/
+    └── week3/
+        └── member1_movement/
+```
 
-## Run it locally
+The GPS input must contain these fields (case-insensitive aliases are accepted):
+`DeviceID`, `SessionID`, `Timestamp`, `Latitude`, `Longitude`.
+An optional `Speed` column is retained, but movement speed is derived from projected consecutive-point distances and timestamp gaps.
+
+## 2. Install dependencies
+
+From the `GeoPulse/` project root:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-streamlit run app.py
+python -m pip install -r member1_movement_analysis/requirements.txt
 ```
 
-## Deploy on Streamlit Community Cloud
+## 3. Run the scripts in order
 
-1. Push this folder to a GitHub repository.
-2. On [share.streamlit.io](https://share.streamlit.io) choose **New app**, pick the repository and set the main file to `app.py`.
-3. Optional: open **App settings > Secrets** and add the keys from `.streamlit/secrets.toml.example`.
-
-## Data
-
-The demo data is simulated (visits, rent, weekly and hourly patterns), so numbers are illustrative until you upload real files on the **Data** page. Only the areas file is required.
-
-| File | Required columns | Optional columns |
-|---|---|---|
-| Areas | Area, Latitude, Longitude, Visits | Retail Stores, Opportunity Score, Rent Index |
-| Stores | Store, Category, Latitude, Longitude | Area |
-| Weekly visits | Area, Week, Visits | |
-| Hourly visits | Area, Day (Mon to Sun), Hour, Visits | |
-
-Store locations can come from three sources, chosen under **Data source** in the sidebar:
-- Simulated (instant)
-- OpenStreetMap (free, no foot traffic)
-- Google Places (needs your own API key; results are cached for 24 hours)
-
-## Secrets (optional)
-
-| Key | Purpose |
-|---|---|
-| `APP_PASSWORD` | Turns on a password screen |
-| `GOOGLE_PLACES_API_KEY` | Loads shops from Google Places |
-
-## Project structure
-
-```
-geopulse/
-├── app.py
-├── requirements.txt
-├── README.md
-├── .gitignore
-└── .streamlit/
-    ├── config.toml              # blue theme
-    └── secrets.toml.example     # copy to secrets.toml; never commit it
+```bash
+python member1_movement_analysis/01_movement_data_validation.py
+python member1_movement_analysis/02_device_movement_analysis.py
+python member1_movement_analysis/03_speed_distance_analysis.py
+python member1_movement_analysis/04_movement_mode_analysis.py
+python member1_movement_analysis/05_movement_quality_report.py
 ```
 
-## Credits
+Run from the project root. The original `data/gps_pings.csv` is read-only from the scripts' perspective. All generated files go into `outputs/week3/member1_movement/`.
 
-- Street map data © OpenStreetMap contributors (ODbL)
-- Satellite imagery © Esri, Maxar, Earthstar Geographics
-- Built with Streamlit, Plotly, pandas and scikit-learn
+## 4. Generated outputs
 
-## Contact
+- `validated_gps.csv` — valid working rows with projected coordinates
+- `gps_anomalies.csv` — rows with missing IDs/timestamps, invalid coordinates or duplicate pings
+- `session_movement_summary.csv` — ping count, duration, distance, speed and ping-gap statistics per device/session
+- `device_movement_summary.csv` — aggregated device-level metrics
+- `movement_segments.csv` — consecutive-point distance, time gap and derived speed
+- `speed_distance_summary.csv` — distance/speed summary per device/session
+- `movement_segments_with_modes.csv` — segments with movement-mode labels
+- `movement_mode_summary.csv` — movement-mode counts per device/session
+- `overall_movement_mode_summary.csv` — overall mode totals
+- `movement_analysis_report.csv` — device-level report with anomaly counts
+- `session_analysis_report.csv` — session-level report with mode counts
+- `movement_quality_kpis.csv` — headline validation and movement KPIs
 
-doleykrishna170@gmail.com
+## 5. Calculation rules
+
+1. Points are sorted by `DeviceID`, `SessionID`, and `Timestamp`.
+2. Distances are calculated only between adjacent points belonging to the same device and session.
+3. Coordinates are projected from EPSG:4326 into the configured projected CRS before calculating metres.
+4. Segments separated by more than 30 minutes are excluded from travelled-distance and derived-speed totals, but the gap remains available for quality review.
+5. Derived speed = segment distance / elapsed seconds × 3.6.
+6. Mode thresholds are simple analytical heuristics, not ground-truth transport labels:
+   - Stationary: below 1 km/h
+   - Walking: 1–7 km/h
+   - Cycling: above 7–25 km/h
+   - Driving: above 25 km/h
+7. Speeds above 160 km/h are flagged for review, not automatically removed.
+8. A GPS ping inside a store catchment is not proof of a physical store visit. This Member 1 package does not infer store visits.
+
+## 6. Coordinate reference system check — important
+
+The Week 3 brief specifies **EPSG:32644**, so that is the default used by the scripts. However, EPSG:32644 is UTM zone 44N, while Guwahati is around 91–92°E and is normally within UTM zone 46N. Before using the distance outputs in final results, confirm the CRS with your project lead/data owner. If the team confirms UTM zone 46N is appropriate, run:
+
+**macOS / Linux**
+```bash
+export GEOPULSE_CRS=EPSG:32646
+python member1_movement_analysis/01_movement_data_validation.py
+python member1_movement_analysis/02_device_movement_analysis.py
+python member1_movement_analysis/03_speed_distance_analysis.py
+python member1_movement_analysis/04_movement_mode_analysis.py
+python member1_movement_analysis/05_movement_quality_report.py
+```
+
+On Windows PowerShell:
+```powershell
+$env:GEOPULSE_CRS="EPSG:32646"
+python member1_movement_analysis/01_movement_data_validation.py
+```
+
+Do not silently change the CRS in the submitted project; document the team's confirmed choice.
+
+## 7. Notes and limitations
+
+- Missing required columns cause a clear error; the scripts do not invent DeviceID or SessionID values.
+- Invalid rows are written to the anomaly file and excluded from movement calculations.
+- The 30-minute gap and 160 km/h anomaly thresholds are review rules and can be adjusted with the team.
+- Device identifiers are treated as strings to preserve IDs such as leading-zero values.
+- Results are descriptive estimates based on simulated GPS pings, not verified customer journeys or actual store transactions.
